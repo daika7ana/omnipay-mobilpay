@@ -76,6 +76,11 @@ abstract class AbstractRequest
     public $type        = self::PAYMENT_TYPE_SMS;
 
     public $objPmNotify    = null;
+    
+    
+    public $token_id        = null;
+    public $token_expiration_date = null;
+    
 
     /**
      * returnUrl (Optional) 	- URL where the user is redirected from mobilpay.ro payment interface
@@ -238,6 +243,18 @@ abstract class AbstractRequest
         }
         $this->orderId = $xmlAttr->nodeValue;
 
+        $elems = $elem->getElementsByTagName('token_id');
+        if ($elems->length == 1) {
+            $xmlElem = $elems->item(0);
+            $this->token_id = $xmlElem->nodeValue;
+        }
+
+        $elems = $elem->getElementsByTagName('token_expiration_date');
+        if ($elems->length == 1) {
+            $xmlElem = $elems->item(0);
+            $this->token_expiration_date = $xmlElem->nodeValue;
+        }   
+        
         $elems = $elem->getElementsByTagName('signature');
         if ($elems->length != 1) {
             throw new Exception('Mobilpay_Payment_Request_Sms::loadFromXml failed: signature is missing', self::ERROR_LOAD_FROM_XML_SIGNATURE_ELEM_MISSING);
