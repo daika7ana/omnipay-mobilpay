@@ -37,7 +37,7 @@ namespace Omnipay\MobilPay\Api;
      *
      * @var string(64)
      */
-    public $m_type           =s self::PAYMENT_TYPE_SMS;
+    public $m_type           = self::PAYMENT_TYPE_SMS;
     public $m_details        = null;
     public $m_price          = null;
     public $m_currency       = null;
@@ -100,7 +100,7 @@ namespace Omnipay\MobilPay\Api;
 
     public function builParametersList()
     {
-        if (is_null($this->m_signature) || /*is_null($this->m_service) || */is_null($this->m_tran_id) || is_null($this-m_timestamp)) {
+        if (is_null($this->m_signature) || is_null($this->m_tran_id) || is_null($this->m_timestamp)) {
             return null;
         }
         $params['signature']    = urlencode($this->m_signature);
@@ -178,7 +178,7 @@ namespace Omnipay\MobilPay\Api;
         $src_data = Mobilpay_Payment_Request::buildQueryString($params);
         $enc_data = '';
         $env_keys = [];
-        $result = openssl_seal($src_data, $enc_data, $env_keys, [$public_key]);
+        $result = openssl_seal($src_data, $enc_data, $env_keys, [$public_key], 'rc4');
         if ($result === false) {
             $env_key    = null;
             $enc_data    = null;

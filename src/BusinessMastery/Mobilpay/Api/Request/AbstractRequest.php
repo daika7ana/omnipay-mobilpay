@@ -76,11 +76,9 @@ abstract class AbstractRequest
     public $type        = self::PAYMENT_TYPE_SMS;
 
     public $objPmNotify    = null;
-    
-    
+
     public $token_id        = null;
     public $token_expiration_date = null;
-    
 
     /**
      * returnUrl (Optional) 	- URL where the user is redirected from mobilpay.ro payment interface
@@ -130,7 +128,7 @@ abstract class AbstractRequest
 
     public function __construct()
     {
-        srand((double) microtime() * 1000000);
+        srand((float) microtime() * 1000000);
         $this->_requestIdentifier = md5(uniqid(rand()));
 
         $this->_objRequestParams = new stdClass();
@@ -170,7 +168,7 @@ abstract class AbstractRequest
 
         $srcData = base64_decode($encData);
         if ($srcData === false) {
-            @openssl_free_key($privateKey);
+            @opnessl_pkey_free($privateKey);
             throw new Exception('Failed decoding data', self::ERROR_CONFIRM_FAILED_DECODING_DATA);
         }
 
@@ -180,7 +178,8 @@ abstract class AbstractRequest
         }
 
         $data = null;
-        $result = @openssl_open($srcData, $data, $srcEnvKey, $privateKey);
+
+        $result = @openssl_open($srcData, $data, $srcEnvKey, $privateKey, 'rc4');
         if ($result === false) {
             throw new Exception('Failed decrypting data', self::ERROR_CONFIRM_FAILED_DECRYPT_DATA);
         }
@@ -201,15 +200,15 @@ abstract class AbstractRequest
             throw new Exception('factoryFromXml invalid payment request type=' . $attr->nodeValue, self::ERROR_FACTORY_BY_XML_ORDER_TYPE_ATTR_NOT_FOUND);
         }
         switch ($attr->nodeValue) {
-        case self::PAYMENT_TYPE_CARD:
-            $objPmReq = new Card();
-            break;
-        case self::PAYMENT_TYPE_SMS:
-            $objPmReq =  new Sms();
-            break;
-        default:
-            throw new Exception('factoryFromXml invalid payment request type=' . $attr->nodeValue, self::ERROR_FACTORY_BY_XML_INVALID_TYPE);
-            break;
+            case self::PAYMENT_TYPE_CARD:
+                $objPmReq = new Card();
+                break;
+            case self::PAYMENT_TYPE_SMS:
+                $objPmReq =  new Sms();
+                break;
+            default:
+                throw new Exception('factoryFromXml invalid payment request type=' . $attr->nodeValue, self::ERROR_FACTORY_BY_XML_INVALID_TYPE);
+                break;
         }
         $objPmReq->_loadFromXml($orderElem);
 
@@ -253,8 +252,8 @@ abstract class AbstractRequest
         if ($elems->length == 1) {
             $xmlElem = $elems->item(0);
             $this->token_expiration_date = $xmlElem->nodeValue;
-        }   
-        
+        }
+
         $elems = $elem->getElementsByTagName('signature');
         if ($elems->length != 1) {
             throw new Exception('Mobilpay_Payment_Request_Sms::loadFromXml failed: signature is missing', self::ERROR_LOAD_FROM_XML_SIGNATURE_ELEM_MISSING);
@@ -331,7 +330,8 @@ abstract class AbstractRequest
         $encData    = null;
         $envKeys    = null;
 
-        $result    = openssl_seal($srcData, $encData, $envKeys, $publicKeys);
+        $result    = openssl_seal($srcData, $encData, $envKeys, $publicKeys, 'rc4');
+
         if ($result === false) {
             $this->outEncData    = null;
             $this->outEnvKey    = null;
@@ -381,11 +381,11 @@ abstract class AbstractRequest
     }
     public function __wakeup()
     {
-        $this->_objRequestParams= new stdClass();
+        $this->_objRequestParams = new stdClass();
     }
     public function __sleep()
     {
-        return ['_requestIdentifier','_objRequestInfo','invoice','orderId','signature', 'returnUrl', 'confirmUrl', 'cancelUrl','params','reqInstallments','selectedInstallments'];
+        return ['_requestIdentifier', '_objRequestInfo', 'invoice', 'orderId', 'signature', 'returnUrl', 'confirmUrl', 'cancelUrl', 'params', 'reqInstallments', 'selectedInstallments'];
     }
 
     public function getXml()
