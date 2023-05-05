@@ -6,7 +6,7 @@ use Omnipay\Common\Message\AbstractResponse;
 use Omnipay\Common\Message\RequestInterface;
 
 /**
- * MobilPay Complete Purchase Response
+ * MobilPay Complete Purchase Response.
  */
 class CompletePurchaseResponse extends AbstractResponse
 {
@@ -26,16 +26,16 @@ class CompletePurchaseResponse extends AbstractResponse
     protected $status;
 
     /**
-     * @param  Omnipay\Common\Message\RequestInterface $request
-     * @param  array $data
-     * @param  stdClass $responseError
+     * @param Omnipay\Common\Message\RequestInterface $request
+     * @param array $data
+     * @param stdClass $responseError
      * @return void
      */
     public function __construct(RequestInterface $request, $data, $responseError)
     {
         parent::__construct($request, $data);
 
-        $this->request       = $request;
+        $this->request = $request;
         $this->responseError = $responseError;
 
         if (isset($data['objPmNotify']['action'])) {
@@ -44,9 +44,9 @@ class CompletePurchaseResponse extends AbstractResponse
     }
 
     /**
-     * Returns whether the transaction was successful
+     * Returns whether the transaction was successful.
      *
-     * @return boolean
+     * @return bool
      */
     public function isSuccessful()
     {
@@ -54,9 +54,9 @@ class CompletePurchaseResponse extends AbstractResponse
     }
 
     /**
-     * Returns whether the transaction is pending
+     * Returns whether the transaction is pending.
      *
-     * @return boolean
+     * @return bool
      */
     public function isPending()
     {
@@ -80,11 +80,11 @@ class CompletePurchaseResponse extends AbstractResponse
     }
 
     /**
-     * Send IPN response
+     * Send IPN response.
      *
      * @return void
      */
-    public function sendResponse()
+    public function sendResponse(): void
     {
         header('Content-type: application/xml');
         echo "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";

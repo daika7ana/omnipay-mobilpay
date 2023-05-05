@@ -19,16 +19,21 @@
         }
     ],
     "require": {
-        "php": ">=7.1",
+        "php": ">=7.4",
         "omnipay/common": "~3.0"
     },
     "require-dev": {
-        "omnipay/tests": "~2.0"
+        "omnipay/tests": "^4.1"
     },
     "autoload": {
         "psr-4": {
             "Omnipay\\MobilPay\\": "src/BusinessMastery/Mobilpay"
         }
     },
-    "minimum-stability": "dev"
+    "minimum-stability": "dev",
+    "config": {
+        "allow-plugins": {
+            "php-http/discovery": false
+        }
+    }
 }

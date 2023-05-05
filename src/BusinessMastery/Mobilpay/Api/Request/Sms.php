@@ -2,7 +2,7 @@
 
 namespace Omnipay\MobilPay\Api\Request;
 
-/**
+/*
  * Class Mobilpay_Payment_Request_Sms
  * This class can be used for accessing mobilpay.ro payment interface for your configured online services
  * @copyright NETOPIA System
@@ -11,20 +11,20 @@ namespace Omnipay\MobilPay\Api\Request;
  */
 
 use Exception;
-use DOMDocument;
 use DOMElement;
-use DOMNode;
+use DOMDocument;
 
 class Sms extends AbstractRequest
 {
-    const ERROR_LOAD_FROM_XML_SERVICE_ELEM_MISSING        = 0x31000001;
+    public const ERROR_LOAD_FROM_XML_SERVICE_ELEM_MISSING = 0x31000001;
+
     /**
      * mobilePhone	(Optional)		- MSISDN (mobile phone numner) of the customer. If it's supplied it should be in 07XXXXXXXX format.
-     * If it's supplied mobilpay.ro will autocomplete mobile phone field on payment interface
+     * If it's supplied mobilpay.ro will autocomplete mobile phone field on payment interface.
      *
      * @var string(10)
      */
-    public $msisdn        = null;
+    public $msisdn = null;
 
     public function __construct()
     {
@@ -36,7 +36,7 @@ class Sms extends AbstractRequest
     {
         parent::_parseFromXml($elem);
 
-        //SMS request specific data
+        // SMS request specific data
         $elems = $elem->getElementsByTagName('service');
         if ($elems->length != 1) {
             throw new Exception('Mobilpay_Payment_Request_Sms::loadFromXml failed: service is missing', self::ERROR_LOAD_FROM_XML_SERVICE_ELEM_MISSING);
@@ -50,13 +50,14 @@ class Sms extends AbstractRequest
         }
 
         $elem = $elem;
+
         return $this;
     }
 
     protected function _loadFromQueryString($queryString)
     {
         $parameters = explode('&', $queryString);
-        $reqParams    = [];
+        $reqParams = [];
         foreach ($parameters as $item) {
             list($key, $value) = explode('=', $item);
             $reqParams[$key] = urldecode($value);
@@ -102,48 +103,48 @@ class Sms extends AbstractRequest
             throw new Exception('One or more mandatory properties are invalid!', self::ERROR_PREPARE_MANDATORY_PROPERTIES_UNSET);
         }
 
-        $this->_xmlDoc        = new DOMDocument('1.0', 'utf-8');
-        $rootElem            = $this->_xmlDoc->createElement('order');
+        $this->_xmlDoc = new DOMDocument('1.0', 'utf-8');
+        $rootElem = $this->_xmlDoc->createElement('order');
 
-        //set payment type attribute
-        $xmlAttr            = $this->_xmlDoc->createAttribute('type');
-        $xmlAttr->nodeValue    = $this->type;
+        // set payment type attribute
+        $xmlAttr = $this->_xmlDoc->createAttribute('type');
+        $xmlAttr->nodeValue = $this->type;
         $rootElem->appendChild($xmlAttr);
 
-        //set id attribute
-        $xmlAttr            = $this->_xmlDoc->createAttribute('id');
-        $xmlAttr->nodeValue    = $this->orderId;
+        // set id attribute
+        $xmlAttr = $this->_xmlDoc->createAttribute('id');
+        $xmlAttr->nodeValue = $this->orderId;
         $rootElem->appendChild($xmlAttr);
 
-        //set timestamp attribute
-        $xmlAttr            = $this->_xmlDoc->createAttribute('timestamp');
-        $xmlAttr->nodeValue    = date('YmdHis');
+        // set timestamp attribute
+        $xmlAttr = $this->_xmlDoc->createAttribute('timestamp');
+        $xmlAttr->nodeValue = date('YmdHis');
         $rootElem->appendChild($xmlAttr);
 
-        $xmlElem            = $this->_xmlDoc->createElement('signature');
-        $xmlElem->nodeValue    = $this->signature;
+        $xmlElem = $this->_xmlDoc->createElement('signature');
+        $xmlElem->nodeValue = $this->signature;
         $rootElem->appendChild($xmlElem);
 
-        $xmlElem            = $this->_xmlDoc->createElement('service');
-        $xmlElem->nodeValue    = $this->service;
+        $xmlElem = $this->_xmlDoc->createElement('service');
+        $xmlElem->nodeValue = $this->service;
         $rootElem->appendChild($xmlElem);
 
         if (!is_null($this->msisdn)) {
-            $xmlElem            = $this->_xmlDoc->createElement('msisdn');
-            $xmlElem->nodeValue    = $this->msisdn;
+            $xmlElem = $this->_xmlDoc->createElement('msisdn');
+            $xmlElem->nodeValue = $this->msisdn;
             $rootElem->appendChild($xmlElem);
         }
 
         if (is_array($this->params) && sizeof($this->params) > 0) {
             $xmlParams = $this->_xmlDoc->createElement('params');
-            foreach ($this->params as $key=>$value) {
-                $xmlParam    = $this->_xmlDoc->createElement('param');
+            foreach ($this->params as $key => $value) {
+                $xmlParam = $this->_xmlDoc->createElement('param');
 
-                $xmlName            = $this->_xmlDoc->createElement('name');
+                $xmlName = $this->_xmlDoc->createElement('name');
                 $xmlName->nodeValue = trim($key);
                 $xmlParam->appendChild($xmlName);
 
-                $xmlValue            = $this->_xmlDoc->createElement('value');
+                $xmlValue = $this->_xmlDoc->createElement('value');
                 $xmlValue->appendChild($this->_xmlDoc->createCDATASection(urlencode($value)));
                 $xmlParam->appendChild($xmlValue);
 

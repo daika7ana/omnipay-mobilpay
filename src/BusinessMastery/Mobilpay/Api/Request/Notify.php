@@ -2,7 +2,7 @@
 
 namespace Omnipay\MobilPay\Api\Request;
 
-/**
+/*
  * Class Mobilpay_Payment_Request_Notify
  * This class can be used for accessing payment info sent by mobilpay.ro in confirmation process
  * @copyright NETOPIA System
@@ -10,25 +10,34 @@ namespace Omnipay\MobilPay\Api\Request;
  * @version 1.0
  */
 
-use Omnipay\MobilPay\Api\Address;
 use DOMElement;
-use DOMNode;
+use Omnipay\MobilPay\Api\Address;
 
 class Notify
 {
-    const ERROR_LOAD_FROM_XML_CRC_ATTR_MISSING = 0x60000001;
-    const ERROR_LOAD_FROM_XML_ACTION_ELEM_MISSING = 0x60000002;
+    public const ERROR_LOAD_FROM_XML_CRC_ATTR_MISSING = 0x60000001;
 
-    public $purchaseId                = null;
-    public $action                    = null;
-    public $errorCode                = null;
-    public $errorMessage            = null;
-    public $timestamp                = null;
-    public $originalAmount            = null;
-    public $processedAmount        = null;
-    public $current_payment_count   = 1;
-    public $customer                = null;
-    public $issuer                  = null;
+    public const ERROR_LOAD_FROM_XML_ACTION_ELEM_MISSING = 0x60000002;
+
+    public $purchaseId = null;
+
+    public $action = null;
+
+    public $errorCode = null;
+
+    public $errorMessage = null;
+
+    public $timestamp = null;
+
+    public $originalAmount = null;
+
+    public $processedAmount = null;
+
+    public $current_payment_count = 1;
+
+    public $customer = null;
+
+    public $issuer = null;
 
     private $_crc = null;
 
@@ -36,7 +45,7 @@ class Notify
     {
     }
 
-    public function loadFromXml(DOMElement $elem)
+    public function loadFromXml(DOMElement $elem): void
     {
         $attr = $elem->attributes->getNamedItem('timestamp');
         if ($attr != null) {
@@ -98,7 +107,7 @@ class Notify
         }
     }
 
-    public function _loadFromQueryString($queryString)
+    public function _loadFromQueryString($queryString): void
     {
         $parameters = explode('&', $queryString);
         $reqParams = [];

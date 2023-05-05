@@ -7,7 +7,7 @@ use Omnipay\Common\Message\RequestInterface;
 use Omnipay\Common\Message\RedirectResponseInterface;
 
 /**
- * MobilPay Purchase Response
+ * MobilPay Purchase Response.
  */
 class PurchaseResponse extends AbstractResponse implements RedirectResponseInterface
 {
@@ -17,9 +17,9 @@ class PurchaseResponse extends AbstractResponse implements RedirectResponseInter
     protected $redirectUrl;
 
     /**
-     * @param  Omnipay\Common\Message\RequestInterface $request
-     * @param  array $data
-     * @param  string $redirectUrl
+     * @param Omnipay\Common\Message\RequestInterface $request
+     * @param array $data
+     * @param string $redirectUrl
      * @return void
      */
     public function __construct(RequestInterface $request, $data, $redirectUrl)
@@ -30,9 +30,9 @@ class PurchaseResponse extends AbstractResponse implements RedirectResponseInter
     }
 
     /**
-     * Returns whether the transaction was successful
+     * Returns whether the transaction was successful.
      *
-     * @return boolean
+     * @return bool
      */
     public function isSuccessful()
     {
@@ -41,9 +41,9 @@ class PurchaseResponse extends AbstractResponse implements RedirectResponseInter
 
     /**
      * Returns whether the transaction should continue
-     * on a redirected page
+     * on a redirected page.
      *
-     * @return boolean
+     * @return bool
      */
     public function isRedirect()
     {
@@ -51,7 +51,7 @@ class PurchaseResponse extends AbstractResponse implements RedirectResponseInter
     }
 
     /**
-     * Returns the redirect URL
+     * Returns the redirect URL.
      *
      * @return string
      */
@@ -61,7 +61,7 @@ class PurchaseResponse extends AbstractResponse implements RedirectResponseInter
     }
 
     /**
-     * Returns redirect URL method
+     * Returns redirect URL method.
      *
      * @return string
      */
@@ -71,7 +71,7 @@ class PurchaseResponse extends AbstractResponse implements RedirectResponseInter
     }
 
     /**
-     * Returns the FORM data for the redirect
+     * Returns the FORM data for the redirect.
      *
      * @return array
      */
