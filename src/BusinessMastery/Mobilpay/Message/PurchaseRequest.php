@@ -257,7 +257,9 @@ class PurchaseRequest extends AbstractRequest
 
         $data = [
             'env_key' => $request->getEnvKey(),
-            'data' => $request->getEncData()
+            'data' => $request->getEncData(),
+            'cipher' => $request->getCipher(),
+            'iv' => $request->getIv()
         ];
 
         return $data;

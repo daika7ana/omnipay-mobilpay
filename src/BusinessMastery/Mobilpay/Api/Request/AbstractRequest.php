@@ -129,6 +129,10 @@ abstract class AbstractRequest
 
     public $reqInstallments = null;
 
+    public $outCipher = null;
+
+    public $outIv = null;
+
     protected $_xmlDoc = null;
 
     protected $_requestIdentifier = null;
@@ -264,7 +268,14 @@ abstract class AbstractRequest
         $encData = null;
         $envKeys = null;
 
-        $result = openssl_seal($srcData, $encData, $envKeys, $publicKeys, 'rc4');
+        $existing_algos = openssl_get_cipher_methods();
+        $cipher_algo = 'aes-256-cbc';
+        if (!in_array($cipher_algo, $existing_algos)) {
+            $cipher_algo = 'rc4';
+        }
+
+        $iv = null;
+        $result = openssl_seal($srcData, $encData, $envKeys, $publicKeys, $cipher_algo, $iv);
 
         if ($result === false) {
             $this->outEncData = null;
@@ -279,6 +290,8 @@ abstract class AbstractRequest
 
         $this->outEncData = base64_encode($encData);
         $this->outEnvKey = base64_encode($envKeys[0]);
+        $this->outCipher = $cipher_algo;
+        $this->outIv = (strlen($iv) > 0) ? base64_encode($iv) : '';
     }
 
     public function getEnvKey()
@@ -289,6 +302,16 @@ abstract class AbstractRequest
     public function getEncData()
     {
         return $this->outEncData;
+    }
+
+    public function getCipher()
+    {
+        return $this->outCipher;
+    }
+
+    public function getIv()
+    {
+        return $this->outIv;
     }
 
     public function getRequestIdentifier()
