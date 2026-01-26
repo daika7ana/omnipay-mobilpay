@@ -10,6 +10,7 @@ namespace Omnipay\MobilPay\Api;
  */
 
 use DOMNode;
+use Exception;
 use DOMDocument;
 
 class Address
@@ -24,135 +25,133 @@ class Address
 
     public const ERROR_INVALID_ADDRESS_TYPE_VALUE = 0x11100003;
 
-    public $type = null;
+    public $type;
 
-    public $firstName = null;
+    public $firstName;
 
-    public $lastName = null;
+    public $lastName;
 
-    public $fiscalNumber = null;
+    public $fiscalNumber;
 
-    public $identityNumber = null;
+    public $identityNumber;
 
-    public $country = null;
+    public $country;
 
-    public $county = null;
+    public $county;
 
-    public $city = null;
+    public $city;
 
-    public $zipCode = null;
+    public $zipCode;
 
-    public $address = null;
+    public $address;
 
-    public $email = null;
+    public $email;
 
-    public $mobilePhone = null;
+    public $mobilePhone;
 
-    public $bank = null;
+    public $bank;
 
-    public $iban = null;
+    public $iban;
 
-    public function __construct(DOMNode $elem = null)
+    public function __construct(?DOMNode $domNode = null)
     {
-        if ($elem != null) {
-            $this->loadFromXml($elem);
+        if ($domNode != null) {
+            $this->loadFromXml($domNode);
         }
     }
 
-    public function createXmlElement(DOMDocument $xmlDoc, $nodeName)
+    public function createXmlElement(DOMDocument $domDocument, $nodeName)
     {
-        if (!($xmlDoc instanceof DOMDocument)) {
-            throw new Exception('', self::ERROR_INVALID_PARAMETER);
-        }
-
-        $addrElem = $xmlDoc->createElement($nodeName);
+        $addrElem = $domDocument->createElement($nodeName);
 
         if ($this->type == null) {
             throw new Exception('Invalid address type', self::ERROR_INVALID_ADDRESS_TYPE);
         }
+
         if ($this->type != self::TYPE_COMPANY && $this->type != self::TYPE_PERSON) {
             throw new Exception('Invalid address type', self::ERROR_INVALID_ADDRESS_TYPE_VALUE);
         }
 
-        $xmlAttr = $xmlDoc->createAttribute('type');
+        $xmlAttr = $domDocument->createAttribute('type');
         $xmlAttr->nodeValue = $this->type;
+
         $addrElem->appendChild($xmlAttr);
 
         if ($this->firstName != null) {
-            $xmlElem = $xmlDoc->createElement('first_name');
-            $xmlElem->appendChild($xmlDoc->createCDATASection(urlencode($this->firstName)));
+            $xmlElem = $domDocument->createElement('first_name');
+            $xmlElem->appendChild($domDocument->createCDATASection(urlencode($this->firstName)));
             $addrElem->appendChild($xmlElem);
         }
 
         if ($this->lastName != null) {
-            $xmlElem = $xmlDoc->createElement('last_name');
-            $xmlElem->appendChild($xmlDoc->createCDATASection(urlencode($this->lastName)));
+            $xmlElem = $domDocument->createElement('last_name');
+            $xmlElem->appendChild($domDocument->createCDATASection(urlencode($this->lastName)));
             $addrElem->appendChild($xmlElem);
         }
 
         if ($this->fiscalNumber != null) {
-            $xmlElem = $xmlDoc->createElement('fiscal_number');
-            $xmlElem->appendChild($xmlDoc->createCDATASection(urlencode($this->fiscalNumber)));
+            $xmlElem = $domDocument->createElement('fiscal_number');
+            $xmlElem->appendChild($domDocument->createCDATASection(urlencode($this->fiscalNumber)));
             $addrElem->appendChild($xmlElem);
         }
 
         if ($this->identityNumber != null) {
-            $xmlElem = $xmlDoc->createElement('identity_number');
-            $xmlElem->appendChild($xmlDoc->createCDATASection(urlencode($this->identityNumber)));
+            $xmlElem = $domDocument->createElement('identity_number');
+            $xmlElem->appendChild($domDocument->createCDATASection(urlencode($this->identityNumber)));
             $addrElem->appendChild($xmlElem);
         }
 
         if ($this->country != null) {
-            $xmlElem = $xmlDoc->createElement('country');
-            $xmlElem->appendChild($xmlDoc->createCDATASection(urlencode($this->country)));
+            $xmlElem = $domDocument->createElement('country');
+            $xmlElem->appendChild($domDocument->createCDATASection(urlencode($this->country)));
             $addrElem->appendChild($xmlElem);
         }
 
         if ($this->county != null) {
-            $xmlElem = $xmlDoc->createElement('county');
-            $xmlElem->appendChild($xmlDoc->createCDATASection(urlencode($this->county)));
+            $xmlElem = $domDocument->createElement('county');
+            $xmlElem->appendChild($domDocument->createCDATASection(urlencode($this->county)));
             $addrElem->appendChild($xmlElem);
         }
 
         if ($this->city != null) {
-            $xmlElem = $xmlDoc->createElement('city');
-            $xmlElem->appendChild($xmlDoc->createCDATASection(urlencode($this->city)));
+            $xmlElem = $domDocument->createElement('city');
+            $xmlElem->appendChild($domDocument->createCDATASection(urlencode($this->city)));
             $addrElem->appendChild($xmlElem);
         }
 
         if ($this->zipCode != null) {
-            $xmlElem = $xmlDoc->createElement('zip_code');
-            $xmlElem->appendChild($xmlDoc->createCDATASection(urlencode($this->zipCode)));
+            $xmlElem = $domDocument->createElement('zip_code');
+            $xmlElem->appendChild($domDocument->createCDATASection(urlencode($this->zipCode)));
             $addrElem->appendChild($xmlElem);
         }
 
         if ($this->address != null) {
-            $xmlElem = $xmlDoc->createElement('address');
-            $xmlElem->appendChild($xmlDoc->createCDATASection(urlencode($this->address)));
+            $xmlElem = $domDocument->createElement('address');
+            $xmlElem->appendChild($domDocument->createCDATASection(urlencode($this->address)));
             $addrElem->appendChild($xmlElem);
         }
 
         if ($this->email != null) {
-            $xmlElem = $xmlDoc->createElement('email');
-            $xmlElem->appendChild($xmlDoc->createCDATASection(urlencode($this->email)));
+            $xmlElem = $domDocument->createElement('email');
+            $xmlElem->appendChild($domDocument->createCDATASection(urlencode($this->email)));
             $addrElem->appendChild($xmlElem);
         }
 
         if ($this->mobilePhone != null) {
-            $xmlElem = $xmlDoc->createElement('mobile_phone');
-            $xmlElem->appendChild($xmlDoc->createCDATASection(urlencode($this->mobilePhone)));
+            $xmlElem = $domDocument->createElement('mobile_phone');
+            $xmlElem->appendChild($domDocument->createCDATASection(urlencode($this->mobilePhone)));
             $addrElem->appendChild($xmlElem);
         }
 
         if ($this->bank != null) {
-            $xmlElem = $xmlDoc->createElement('bank');
-            $xmlElem->appendChild($xmlDoc->createCDATASection(urlencode($this->bank)));
+            $xmlElem = $domDocument->createElement('bank');
+            $xmlElem->appendChild($domDocument->createCDATASection(urlencode($this->bank)));
             $addrElem->appendChild($xmlElem);
         }
 
         if ($this->iban != null) {
-            $xmlElem = $xmlDoc->createElement('iban');
-            $xmlElem->appendChild($xmlDoc->createCDATASection(urlencode($this->iban)));
+            $xmlElem = $domDocument->createElement('iban');
+            $xmlElem->appendChild($domDocument->createCDATASection(urlencode($this->iban)));
             $addrElem->appendChild($xmlElem);
         }
 
@@ -178,63 +177,72 @@ class Address
         ];
     }
 
-    protected function loadFromXml(DOMNode $elem): void
+    protected function loadFromXml(DOMNode $domNode): void
     {
-        $attr = $elem->attributes->getNamedItem('type');
-        if ($attr != null) {
-            $this->type = $attr->nodeValue;
-        } else {
-            $this->type = self::TYPE_PERSON;
-        }
-        $elems = $elem->getElementsByTagName('first_name');
+        $attr = $domNode->attributes->getNamedItem('type');
+        $this->type = $attr != null ? $attr->nodeValue : self::TYPE_PERSON;
+
+        $elems = $domNode->getElementsByTagName('first_name');
         if ($elems->length == 1) {
             $this->firstName = urldecode($elems->item(0)->nodeValue);
         }
-        $elems = $elem->getElementsByTagName('last_name');
+
+        $elems = $domNode->getElementsByTagName('last_name');
         if ($elems->length == 1) {
             $this->lastName = urldecode($elems->item(0)->nodeValue);
         }
-        $elems = $elem->getElementsByTagName('fiscal_number');
+
+        $elems = $domNode->getElementsByTagName('fiscal_number');
         if ($elems->length == 1) {
             $this->fiscalNumber = urldecode($elems->item(0)->nodeValue);
         }
-        $elems = $elem->getElementsByTagName('identity_number');
+
+        $elems = $domNode->getElementsByTagName('identity_number');
         if ($elems->length == 1) {
             $this->identityNumber = urldecode($elems->item(0)->nodeValue);
         }
-        $elems = $elem->getElementsByTagName('country');
+
+        $elems = $domNode->getElementsByTagName('country');
         if ($elems->length == 1) {
             $this->country = urldecode($elems->item(0)->nodeValue);
         }
-        $elems = $elem->getElementsByTagName('county');
+
+        $elems = $domNode->getElementsByTagName('county');
         if ($elems->length == 1) {
             $this->county = urldecode($elems->item(0)->nodeValue);
         }
-        $elems = $elem->getElementsByTagName('city');
+
+        $elems = $domNode->getElementsByTagName('city');
         if ($elems->length == 1) {
             $this->city = urldecode($elems->item(0)->nodeValue);
         }
-        $elems = $elem->getElementsByTagName('zip_code');
+
+        $elems = $domNode->getElementsByTagName('zip_code');
         if ($elems->length == 1) {
             $this->zipCode = urldecode($elems->item(0)->nodeValue);
         }
-        $elems = $elem->getElementsByTagName('address');
+
+        $elems = $domNode->getElementsByTagName('address');
         if ($elems->length == 1) {
             $this->address = urldecode($elems->item(0)->nodeValue);
         }
-        $elems = $elem->getElementsByTagName('email');
+
+        $elems = $domNode->getElementsByTagName('email');
         if ($elems->length == 1) {
             $this->email = urldecode($elems->item(0)->nodeValue);
         }
-        $elems = $elem->getElementsByTagName('mobile_phone');
+
+        $elems = $domNode->getElementsByTagName('mobile_phone');
         if ($elems->length == 1) {
             $this->mobilePhone = urldecode($elems->item(0)->nodeValue);
         }
-        $elems = $elem->getElementsByTagName('bank');
+
+        $elems = $domNode->getElementsByTagName('bank');
         if ($elems->length == 1) {
             $this->bank = urldecode($elems->item(0)->nodeValue);
         }
-        $elems = $elem->getElementsByTagName('iban');
+
+        $elems = $domNode->getElementsByTagName('iban');
         if ($elems->length == 1) {
             $this->iban = urldecode($elems->item(0)->nodeValue);
         }

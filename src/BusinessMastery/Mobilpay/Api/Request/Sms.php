@@ -24,7 +24,7 @@ class Sms extends AbstractRequest
      *
      * @var string(10)
      */
-    public $msisdn = null;
+    public $msisdn;
 
     public function __construct()
     {
@@ -32,24 +32,23 @@ class Sms extends AbstractRequest
         $this->type = self::PAYMENT_TYPE_SMS;
     }
 
-    protected function _loadFromXml(DOMElement $elem)
+    protected function _loadFromXml(DOMElement $domElement)
     {
-        parent::_parseFromXml($elem);
+        parent::_parseFromXml($domElement);
 
         // SMS request specific data
-        $elems = $elem->getElementsByTagName('service');
+        $elems = $domElement->getElementsByTagName('service');
         if ($elems->length != 1) {
             throw new Exception('Mobilpay_Payment_Request_Sms::loadFromXml failed: service is missing', self::ERROR_LOAD_FROM_XML_SERVICE_ELEM_MISSING);
         }
+
         $xmlElem = $elems->item(0);
         $this->service = $xmlElem->nodeValue;
 
-        $elems = $elem->getElementsByTagName('msisdn');
+        $elems = $domElement->getElementsByTagName('msisdn');
         if ($elems->length == 1) {
             $this->msisdn = $elems->item(0)->nodeValue;
         }
-
-        $elem = $elem;
 
         return $this;
     }
@@ -58,38 +57,46 @@ class Sms extends AbstractRequest
     {
         $parameters = explode('&', $queryString);
         $reqParams = [];
-        foreach ($parameters as $item) {
-            list($key, $value) = explode('=', $item);
+        foreach ($parameters as $parameter) {
+            [$key, $value] = explode('=', $parameter);
             $reqParams[$key] = urldecode($value);
         }
 
         if (!isset($reqParams['signature'])) {
             throw new Exception('Mobilpay_Payment_Request_Sms::loadFromQueryString failed: signature is missing', self::ERROR_LOAD_FROM_XML_SIGNATURE_ELEM_MISSING);
         }
+
         $this->signature = $reqParams['signature'];
         if (!isset($reqParams['service'])) {
             throw new Exception('Mobilpay_Payment_Request_Sms::loadFromQueryString failed: service is missing', self::ERROR_LOAD_FROM_XML_SERVICE_ELEM_MISSING);
         }
+
         $this->service = $reqParams['service'];
         if (!isset($reqParams['tran_id'])) {
             throw new Exception('Mobilpay_Payment_Request_Sms::loadFromQueryString failed: empty order id', self::ERROR_LOAD_FROM_XML_ORDER_ID_ATTR_MISSING);
         }
+
         $this->orderId = $reqParams['tran_id'];
         if (isset($reqParams['timestamp'])) {
             $this->timestamp = $reqParams['timestamp'];
         }
+
         if (isset($reqParams['confirm_url'])) {
             $this->confirmUrl = $reqParams['confirm_url'];
         }
+
         if (isset($reqParams['return_url'])) {
             $this->returnUrl = $reqParams['return_url'];
         }
+
         if (isset($reqParams['msisdn'])) {
             $this->msisdn = $reqParams['msisdn'];
         }
+
         if (isset($reqParams['first_name'])) {
             $this->params['first_name'] = $reqParams['first_name'];
         }
+
         if (isset($reqParams['last_name'])) {
             $this->params['last_name'] = $reqParams['last_name'];
         }
@@ -109,24 +116,29 @@ class Sms extends AbstractRequest
         // set payment type attribute
         $xmlAttr = $this->_xmlDoc->createAttribute('type');
         $xmlAttr->nodeValue = $this->type;
+
         $rootElem->appendChild($xmlAttr);
 
         // set id attribute
         $xmlAttr = $this->_xmlDoc->createAttribute('id');
         $xmlAttr->nodeValue = $this->orderId;
+
         $rootElem->appendChild($xmlAttr);
 
         // set timestamp attribute
         $xmlAttr = $this->_xmlDoc->createAttribute('timestamp');
         $xmlAttr->nodeValue = date('YmdHis');
+
         $rootElem->appendChild($xmlAttr);
 
         $xmlElem = $this->_xmlDoc->createElement('signature');
         $xmlElem->nodeValue = $this->signature;
+
         $rootElem->appendChild($xmlElem);
 
         $xmlElem = $this->_xmlDoc->createElement('service');
         $xmlElem->nodeValue = $this->service;
+
         $rootElem->appendChild($xmlElem);
 
         if (!is_null($this->msisdn)) {
@@ -135,7 +147,7 @@ class Sms extends AbstractRequest
             $rootElem->appendChild($xmlElem);
         }
 
-        if (is_array($this->params) && sizeof($this->params) > 0) {
+        if (is_array($this->params) && $this->params !== []) {
             $xmlParams = $this->_xmlDoc->createElement('params');
             foreach ($this->params as $key => $value) {
                 $xmlParam = $this->_xmlDoc->createElement('param');
@@ -161,6 +173,7 @@ class Sms extends AbstractRequest
                 $xmlElem->nodeValue = $this->returnUrl;
                 $xmlUrl->appendChild($xmlElem);
             }
+
             if (!is_null($this->confirmUrl)) {
                 $xmlElem = $this->_xmlDoc->createElement('confirm');
                 $xmlElem->nodeValue = $this->confirmUrl;

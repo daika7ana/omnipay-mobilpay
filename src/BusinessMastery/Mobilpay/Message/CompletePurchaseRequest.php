@@ -2,6 +2,7 @@
 
 namespace Omnipay\MobilPay\Message;
 
+use Exception;
 use stdClass;
 use Omnipay\MobilPay\Api\Request\AbstractRequest;
 use Omnipay\MobilPay\Exception\MissingKeyException;
@@ -76,6 +77,42 @@ class CompletePurchaseRequest extends PurchaseRequest
     }
 
     /**
+     * @param string $value
+     * @return mixed
+     */
+    public function getIpnCipher()
+    {
+        return $this->getParameter('ipn_cipher');
+    }
+
+    /**
+     * @param string $value
+     * @return mixed
+     */
+    public function setIpnCipher($value)
+    {
+        return $this->setParameter('ipn_cipher', $value);
+    }
+
+    /**
+     * @param string $value
+     * @return mixed
+     */
+    public function getIpnIv()
+    {
+        return $this->getParameter('ipn_iv');
+    }
+
+    /**
+     * @param string $value
+     * @return mixed
+     */
+    public function setIpnIv($value)
+    {
+        return $this->setParameter('ipn_iv', $value);
+    }
+
+    /**
      * Process IPN request data.
      *
      * @return array
@@ -98,7 +135,10 @@ class CompletePurchaseRequest extends PurchaseRequest
                 $data = AbstractRequest::factoryFromEncrypted(
                     $this->getIpnEnvKey(),
                     $this->getIpnData(),
-                    $this->getPrivateKey()
+                    $this->getPrivateKey(),
+                    null,
+                    $this->getIpnCipher() ?: 'rc4',
+                    $this->getIpnIv()
                 );
 
                 $this->responseError->message = $data->objPmNotify->getCrc();
@@ -140,6 +180,6 @@ class CompletePurchaseRequest extends PurchaseRequest
      */
     public function sendData($data)
     {
-        return $this->response = new CompletePurchaseResponse($this, $data, $this->responseError);
+        return new CompletePurchaseResponse($this, $data, $this->responseError);
     }
 }

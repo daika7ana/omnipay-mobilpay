@@ -10,6 +10,7 @@ namespace Omnipay\MobilPay\Api;
  */
 
 use DOMNode;
+use Exception;
 use DOMDocument;
 
 class Invoice
@@ -22,68 +23,65 @@ class Invoice
 
     public const ERROR_LOAD_FROM_XML_CURRENCY_ATTR_MISSING = 0x31110001;
 
-    public $currency = null;
+    public $currency;
 
-    public $amount = null;
+    public $amount;
 
-    public $details = null;
+    public $details;
 
-    public $installments = null;
+    public $installments;
 
-    public $selectedInstallments = null;
+    public $selectedInstallments;
 
-    protected $billingAddress = null;
+    protected $billingAddress;
 
-    protected $shippingAddress = null;
+    protected $shippingAddress;
 
     protected $items = [];
 
     protected $exchangeRates = [];
 
-    public function __construct(DOMNode $elem = null)
+    public function __construct(?DOMNode $domNode = null)
     {
-        if ($elem != null) {
-            $this->loadFromXml($elem);
+        if ($domNode != null) {
+            $this->loadFromXml($domNode);
         }
     }
 
-    public function createXmlElement(DOMDocument $xmlDoc)
+    public function createXmlElement(DOMDocument $domDocument)
     {
-        if (!($xmlDoc instanceof DOMDocument)) {
-            throw new Exception('', self::ERROR_INVALID_PARAMETER);
-        }
-
-        $xmlInvElem = $xmlDoc->createElement('invoice');
+        $xmlInvElem = $domDocument->createElement('invoice');
 
         if ($this->currency == null) {
             throw new Exception('Invalid currency', self::ERROR_INVALID_CURRENCY);
         }
 
-        $xmlAttr = $xmlDoc->createAttribute('currency');
+        $xmlAttr = $domDocument->createAttribute('currency');
         $xmlAttr->nodeValue = $this->currency;
+
         $xmlInvElem->appendChild($xmlAttr);
 
         if ($this->amount != null) {
-            $xmlAttr = $xmlDoc->createAttribute('amount');
+            $xmlAttr = $domDocument->createAttribute('amount');
             $xmlAttr->nodeValue = sprintf('%.02f', (float) ($this->amount));
             $xmlInvElem->appendChild($xmlAttr);
         }
 
         if ($this->installments != null) {
-            $xmlAttr = $xmlDoc->createAttribute('installments');
+            $xmlAttr = $domDocument->createAttribute('installments');
             $xmlAttr->nodeValue = $this->installments;
             $xmlInvElem->appendChild($xmlAttr);
         }
 
         if ($this->selectedInstallments != null) {
-            $xmlAttr = $xmlDoc->createAttribute('selected_installments');
+            $xmlAttr = $domDocument->createAttribute('selected_installments');
             $xmlAttr->nodeValue = $this->selectedInstallments;
             $xmlInvElem->appendChild($xmlAttr);
         }
 
         if ($this->details != null) {
-            $xmlElem = $xmlDoc->createElement('details');
-            $xmlElem->appendChild($xmlDoc->createCDATASection(urlencode($this->details)));
+            $xmlElem = $domDocument->createElement('details');
+            $xmlElem->appendChild($domDocument->createCDATASection(urlencode($this->details)));
             $xmlInvElem->appendChild($xmlElem);
         }
 
@@ -91,26 +89,26 @@ class Invoice
             $xmlAddr = null;
             if ($this->billingAddress instanceof Address) {
                 try {
-                    $xmlElem = $this->billingAddress->createXmlElement($xmlDoc, 'billing');
-                    if ($xmlAddr == null) {
-                        $xmlAddr = $xmlDoc->createElement('contact_info');
-                    }
+                    $xmlElem = $this->billingAddress->createXmlElement($domDocument, 'billing');
+                    $xmlAddr = $domDocument->createElement('contact_info');
+
                     $xmlAddr->appendChild($xmlElem);
                 } catch (Exception $e) {
-                    $e = $e;
                 }
             }
+
             if ($this->shippingAddress instanceof Address) {
                 try {
-                    $xmlElem = $this->shippingAddress->createXmlElement($xmlDoc, 'shipping');
+                    $xmlElem = $this->shippingAddress->createXmlElement($domDocument, 'shipping');
                     if ($xmlAddr == null) {
-                        $xmlAddr = $xmlDoc->createElement('contact_info');
+                        $xmlAddr = $domDocument->createElement('contact_info');
                     }
+
                     $xmlAddr->appendChild($xmlElem);
                 } catch (Exception $e) {
-                    $e = $e;
                 }
             }
+
             if ($xmlAddr != null) {
                 $xmlInvElem->appendChild($xmlAddr);
             }
@@ -143,35 +141,36 @@ class Invoice
         return $this->shippingAddress;
     }
 
-    protected function loadFromXml(DOMNode $elem): void
+    protected function loadFromXml(DOMNode $domNode): void
     {
-        $attr = $elem->attributes->getNamedItem('currency');
+        $attr = $domNode->attributes->getNamedItem('currency');
         if ($attr == null) {
             throw new Exception('Invoice::loadFromXml failed; currency attribute missing', self::ERROR_LOAD_FROM_XML_CURRENCY_ATTR_MISSING);
         }
+
         $this->currency = $attr->nodeValue;
 
-        $attr = $elem->attributes->getNamedItem('amount');
+        $attr = $domNode->attributes->getNamedItem('amount');
         if ($attr != null) {
             $this->amount = $attr->nodeValue;
         }
 
-        $attr = $elem->attributes->getNamedItem('installments');
+        $attr = $domNode->attributes->getNamedItem('installments');
         if ($attr != null) {
             $this->installments = $attr->nodeValue;
         }
 
-        $attr = $elem->attributes->getNamedItem('selected_installments');
+        $attr = $domNode->attributes->getNamedItem('selected_installments');
         if ($attr != null) {
             $this->selectedInstallments = $attr->nodeValue;
         }
 
-        $elems = $elem->getElementsByTagName('details');
+        $elems = $domNode->getElementsByTagName('details');
         if ($elems->length == 1) {
             $this->details = urldecode($elems->item(0)->nodeValue);
         }
 
-        $elems = $elem->getElementsByTagName('contact_info');
+        $elems = $domNode->getElementsByTagName('contact_info');
         if ($elems->length == 1) {
             $addrElem = $elems->item(0);
 

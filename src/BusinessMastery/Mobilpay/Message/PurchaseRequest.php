@@ -223,46 +223,42 @@ class PurchaseRequest extends AbstractRequest
     public function getData()
     {
         $this->validate('amount', 'currency', 'orderId', 'confirmUrl', 'returnUrl', 'details');
-
-        $envKey = $envData = null;
         $publicKey = $this->getParameter('publicKey');
 
         if (!$publicKey) {
             throw new MissingKeyException('Missing public key path parameter');
         }
 
-        $request = new Card();
-        $request->signature = $this->getMerchantId();
-        $request->orderId = $this->getParameter('orderId');
-        $request->confirmUrl = $this->getParameter('confirmUrl');
-        $request->returnUrl = $this->getParameter('returnUrl');
-        $request->params = $this->getParameter('params') ?: [];
+        $card = new Card();
+        $card->signature = $this->getMerchantId();
+        $card->orderId = $this->getParameter('orderId');
+        $card->confirmUrl = $this->getParameter('confirmUrl');
+        $card->returnUrl = $this->getParameter('returnUrl');
+        $card->params = $this->getParameter('params') ?: [];
 
         if ($this->getParameter('recurrence')) {
-            $request->recurrence = new Recurrence();
-            $request->recurrence->payments_no = $this->getParameter('paymentNo');
-            $request->recurrence->interval_day = $this->getParameter('intervalDay');
+            $card->recurrence = new Recurrence();
+            $card->recurrence->payments_no = $this->getParameter('paymentNo');
+            $card->recurrence->interval_day = $this->getParameter('intervalDay');
         }
 
-        $request->invoice = new Invoice();
-        $request->invoice->currency = $this->getParameter('currency');
-        $request->invoice->amount = $this->getParameter('amount');
-        $request->invoice->details = $this->getParameter('details');
+        $card->invoice = new Invoice();
+        $card->invoice->currency = $this->getParameter('currency');
+        $card->invoice->amount = $this->getParameter('amount');
+        $card->invoice->details = $this->getParameter('details');
 
         if ($getBillingAddress = $this->getBillingAddress()) {
-            $request->invoice->setBillingAddress($this->makeBillingAddress($getBillingAddress));
+            $card->invoice->setBillingAddress($this->makeBillingAddress($getBillingAddress));
         }
 
-        $request->encrypt($this->getParameter('publicKey'));
+        $card->encrypt($this->getParameter('publicKey'));
 
-        $data = [
-            'env_key' => $request->getEnvKey(),
-            'data' => $request->getEncData(),
-            'cipher' => $request->getCipher(),
-            'iv' => $request->getIv()
+        return [
+            'env_key' => $card->getEnvKey(),
+            'data' => $card->getEncData(),
+            'cipher' => $card->getCipher(),
+            'iv' => $card->getIv()
         ];
-
-        return $data;
     }
 
     /**
@@ -306,6 +302,6 @@ class PurchaseRequest extends AbstractRequest
      */
     public function sendData($data)
     {
-        return $this->response = new PurchaseResponse($this, $data, $this->getEndpoint());
+        return new PurchaseResponse($this, $data, $this->getEndpoint());
     }
 }

@@ -3,6 +3,7 @@
 namespace Omnipay\MobilPay\Api;
 
 use DOMNode;
+use Exception;
 use DOMDocument;
 
 class Recurrence
@@ -15,24 +16,20 @@ class Recurrence
 
     public const ERROR_LOAD_FROM_XML_CURRENCY_ATTR_MISSING = 0x31110001;
 
-    public $interval_day = null;
+    public $interval_day;
 
-    public $payments_no = null;
+    public $payments_no;
 
-    public function __construct(DOMNode $elem = null)
+    public function __construct(DOMNode $domNode = null)
     {
-        if ($elem != null) {
-            $this->loadFromXml($elem);
+        if ($domNode != null) {
+            $this->loadFromXml($domNode);
         }
     }
 
-    public function createXmlElement(DOMDocument $xmlDoc)
+    public function createXmlElement(DOMDocument $domDocument)
     {
-        if (!($xmlDoc instanceof DOMDocument)) {
-            throw new Exception('', self::ERROR_INVALID_PARAMETER);
-        }
-
-        $xmlInvElem = $xmlDoc->createElement('recurrence');
+        $xmlInvElem = $domDocument->createElement('recurrence');
 
         if (is_null($this->interval_day)) {
             throw new Exception('Invalid interval_day', self::ERROR_INVALID_INTERVAL_DAY);
@@ -42,11 +39,12 @@ class Recurrence
             throw new Exception('Invalid payments_no', self::ERROR_INVALID_PAYMENTS_NO);
         }
 
-        $xmlAttr = $xmlDoc->createAttribute('payments_no');
+        $xmlAttr = $domDocument->createAttribute('payments_no');
         $xmlAttr->nodeValue = $this->payments_no;
+
         $xmlInvElem->appendChild($xmlAttr);
 
-        $xmlAttr = $xmlDoc->createAttribute('interval_day');
+        $xmlAttr = $domDocument->createAttribute('interval_day');
         $xmlAttr->nodeValue = $this->interval_day;
 
         $xmlInvElem->appendChild($xmlAttr);
@@ -54,19 +52,21 @@ class Recurrence
         return $xmlInvElem;
     }
 
-    protected function loadFromXml(DOMNode $elem): void
+    protected function loadFromXml(DOMNode $domNode): void
     {
-        $attr = $elem->attributes->getNamedItem('interval_day');
+        $attr = $domNode->attributes->getNamedItem('interval_day');
 
         if (is_null($attr)) {
             throw new Exception('Mobilpay_Payment_Recurrence::loadFromXml failed; interval_day attribute missing', self::ERROR_LOAD_FROM_XML_CURRENCY_ATTR_MISSING);
         }
+
         $this->interval_day = $attr->value;
 
-        $attr = $elem->attributes->getNamedItem('payments_no');
+        $attr = $domNode->attributes->getNamedItem('payments_no');
         if (is_null($attr)) {
             throw new Exception('Mobilpay_Payment_Recurrence::loadFromXml failed; payments_no attribute missing', self::ERROR_LOAD_FROM_XML_CURRENCY_ATTR_MISSING);
         }
+
         $this->payments_no = $attr->value;
     }
 }

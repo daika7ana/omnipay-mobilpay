@@ -21,9 +21,9 @@ class Card extends AbstractRequest
 {
     public const ERROR_LOAD_FROM_XML_ORDER_INVOICE_ELEM_MISSING = 0x30000001;
 
-    public $invoice = null;
+    public $invoice;
 
-    public $recurrence = null;
+    public $recurrence;
 
     public function __construct()
     {
@@ -31,19 +31,19 @@ class Card extends AbstractRequest
         $this->type = self::PAYMENT_TYPE_CARD;
     }
 
-    protected function _loadFromXml(DOMElement $elem)
+    protected function _loadFromXml(DOMElement $domElement)
     {
-        parent::_parseFromXml($elem);
+        parent::_parseFromXml($domElement);
 
         // card request specific data
-        $elems = $elem->getElementsByTagName('invoice');
+        $elems = $domElement->getElementsByTagName('invoice');
         if ($elems->length != 1) {
             throw new Exception('Mobilpay_Payment_Request_Card::loadFromXml failed; invoice element is missing', self::ERROR_LOAD_FROM_XML_ORDER_INVOICE_ELEM_MISSING);
         }
 
         $this->invoice = new Invoice($elems->item(0));
 
-        $elems = $elem->getElementsByTagName('recurrence');
+        $elems = $domElement->getElementsByTagName('recurrence');
 
         if ($elems->length > 0) {
             $this->recurrence = new Recurrence($elems->item(0));
@@ -64,24 +64,29 @@ class Card extends AbstractRequest
         // set payment type attribute
         $xmlAttr = $this->_xmlDoc->createAttribute('type');
         $xmlAttr->nodeValue = $this->type;
+
         $rootElem->appendChild($xmlAttr);
 
         // set id attribute
         $xmlAttr = $this->_xmlDoc->createAttribute('id');
         $xmlAttr->nodeValue = $this->orderId;
+
         $rootElem->appendChild($xmlAttr);
 
         // set timestamp attribute
         $xmlAttr = $this->_xmlDoc->createAttribute('timestamp');
         $xmlAttr->nodeValue = date('YmdHis');
+
         $rootElem->appendChild($xmlAttr);
 
         $xmlElem = $this->_xmlDoc->createElement('signature');
         $xmlElem->nodeValue = $this->signature;
+
         $rootElem->appendChild($xmlElem);
 
         $xmlElem = $this->_xmlDoc->createElement('service');
         $xmlElem->nodeValue = $this->service;
+
         $rootElem->appendChild($xmlElem);
 
         $xmlElem = $this->invoice->createXmlElement($this->_xmlDoc);
@@ -92,7 +97,7 @@ class Card extends AbstractRequest
             $rootElem->appendChild($xmlElem);
         }
 
-        if (is_array($this->params) && sizeof($this->params) > 0) {
+        if (is_array($this->params) && $this->params !== []) {
             $xmlParams = $this->_xmlDoc->createElement('params');
             foreach ($this->params as $key => $value) {
                 $xmlParam = $this->_xmlDoc->createElement('param');
@@ -118,6 +123,7 @@ class Card extends AbstractRequest
                 $xmlElem->nodeValue = $this->returnUrl;
                 $xmlUrl->appendChild($xmlElem);
             }
+
             if (!is_null($this->confirmUrl)) {
                 $xmlElem = $this->_xmlDoc->createElement('confirm');
                 $xmlElem->nodeValue = $this->confirmUrl;

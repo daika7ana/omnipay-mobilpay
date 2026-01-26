@@ -8,6 +8,11 @@ namespace Omnipay\MobilPay\Api\Invoice;
  * @author Claudiu Tudose
  * @version 1.0
  */
+
+use DOMNode;
+use Exception;
+use DOMDocument;
+
 class Item
 {
     public const ERROR_INVALID_PARAMETER = 0x11111001;
@@ -28,59 +33,61 @@ class Item
 
     public const ERROR_LOAD_FROM_XML_VAT_ELEM_MISSING = 0x40000007;
 
-    public $code = null;
+    public $code;
 
-    public $name = null;
+    public $name;
 
-    public $measurment = null;
+    public $measurment;
 
-    public $quantity = null;
+    public $quantity;
 
-    public $price = null;
+    public $price;
 
-    public $vat = null;
+    public $vat;
 
-    public function __construct(DOMNode $elem = null)
+    public function __construct(?DOMNode $domNode = null)
     {
-        if ($elem != null) {
-            $this->loadFromXml($elem);
+        if ($domNode != null) {
+            $this->loadFromXml($domNode);
         }
     }
 
-    public function createXmlElement(DOMDocument $xmlDoc)
+    public function createXmlElement(DOMDocument $domDocument)
     {
-        if (!($xmlDoc instanceof DOMDocument)) {
-            throw new Exception('', self::ERROR_INVALID_PARAMETER);
-        }
-
-        $xmlItemElem = $xmlDoc->createElement('item');
+        $xmlItemElem = $domDocument->createElement('item');
 
         if ($this->code == null || $this->name == null || $this->measurment == null || $this->quantity == null || $this->price == null || $this->vat == null) {
             throw new Exception('Invalid property', self::ERROR_INVALID_PROPERTY);
         }
 
-        $xmlElem = $xmlDoc->createElement('code');
-        $xmlElem->appendChild($xmlDoc->createCDATASection(urlencode($this->code)));
+        $xmlElem = $domDocument->createElement('code');
+        $xmlElem->appendChild($domDocument->createCDATASection(urlencode($this->code)));
+
         $xmlItemElem->appendChild($xmlElem);
 
-        $xmlElem = $xmlDoc->createElement('name');
-        $xmlElem->appendChild($xmlDoc->createCDATASection(urlencode($this->name)));
+        $xmlElem = $domDocument->createElement('name');
+        $xmlElem->appendChild($domDocument->createCDATASection(urlencode($this->name)));
+
         $xmlItemElem->appendChild($xmlElem);
 
-        $xmlElem = $xmlDoc->createElement('measurment');
-        $xmlElem->appendChild($xmlDoc->createCDATASection(urlencode($this->measurment)));
+        $xmlElem = $domDocument->createElement('measurment');
+        $xmlElem->appendChild($domDocument->createCDATASection(urlencode($this->measurment)));
+
         $xmlItemElem->appendChild($xmlElem);
 
-        $xmlElem = $xmlDoc->createElement('quantity');
+        $xmlElem = $domDocument->createElement('quantity');
         $xmlElem->nodeValue = $this->quantity;
+
         $xmlItemElem->appendChild($xmlElem);
 
-        $xmlElem = $xmlDoc->createElement('price');
+        $xmlElem = $domDocument->createElement('price');
         $xmlElem->nodeValue = $this->price;
+
         $xmlItemElem->appendChild($xmlElem);
 
-        $xmlElem = $xmlDoc->createElement('vat');
+        $xmlElem = $domDocument->createElement('vat');
         $xmlElem->nodeValue = $this->vat;
+
         $xmlItemElem->appendChild($xmlElem);
 
         return $xmlItemElem;
@@ -94,47 +101,52 @@ class Item
         return $value + $vat;
     }
 
-    protected function loadFromXml(DOMNode $elem)
+    protected function loadFromXml(DOMNode $domNode)
     {
-        $elems = $elem->getElementsByTagName('code');
+        $elems = $domNode->getElementsByTagName('code');
         if ($elems->length != 1) {
             throw new Exception('Mobilpay_Payment_Invoice_Item::loadFromXml failed! Invalid code element.', self::ERROR_LOAD_FROM_XML_CODE_ELEM_MISSING);
         }
+
         $this->code = urldecode($elems->item(0)->nodeValue);
 
-        $elems = $elem->getElementsByTagName('name');
+        $elems = $domNode->getElementsByTagName('name');
         if ($elems->length != 1) {
             throw new Exception('Mobilpay_Payment_Invoice_Item::loadFromXml failed! Invalid name element.', self::ERROR_LOAD_FROM_XML_NAME_ELEM_MISSING);
         }
+
         $this->name = urldecode($elems->item(0)->nodeValue);
 
-        $elems = $elem->getElementsByTagName('measurment');
+        $elems = $domNode->getElementsByTagName('measurment');
         if ($elems->length == 1) {
             $this->measurment = urldecode($elems->item(0)->nodeValue);
         }
 
-        $elems = $elem->getElementsByTagName('quantity');
+        $elems = $domNode->getElementsByTagName('quantity');
         if ($elems->length != 1) {
             throw new Exception('Mobilpay_Payment_Invoice_Item::loadFromXml failed! Invalid quantity element.', self::ERROR_LOAD_FROM_XML_QUANTITY_ELEM_MISSING);
         }
+
         $this->quantity = (float) (urldecode($elems->item(0)->nodeValue));
         if ($this->quantity == 0) {
             throw new Exception('Mobilpay_Payment_Invoice_Item::loadFromXml failed! Invalid quantity value=' . $this->quantity, self::ERROR_LOAD_FROM_XML_QUANTITY_ELEM_EMPTY);
         }
 
-        $elems = $elem->getElementsByTagName('price');
+        $elems = $domNode->getElementsByTagName('price');
         if ($elems->length != 1) {
             throw new Exception('Mobilpay_Payment_Invoice_Item::loadFromXml failed! Invalid price element.', self::ERROR_LOAD_FROM_XML_PRICE_ELEM_MISSING);
         }
+
         $this->price = (float) (urldecode($elems->item(0)->nodeValue));
         if ($this->price == 0) {
             throw new Exception('Mobilpay_Payment_Invoice_Item::loadFromXml failed! Invalid price value=' . $this->price, self::ERROR_LOAD_FROM_XML_PRICE_ELEM_EMPTY);
         }
 
-        $elems = $elem->getElementsByTagName('vat');
+        $elems = $domNode->getElementsByTagName('vat');
         if ($elems->length != 1) {
             throw new Exception('Mobilpay_Payment_Invoice_Item::loadFromXml failed! Invalid vat element.', self::ERROR_LOAD_FROM_XML_VAT_ELEM_MISSING);
         }
+
         $this->vat = (float) (urldecode($elems->item(0)->nodeValue));
 
         return $this;

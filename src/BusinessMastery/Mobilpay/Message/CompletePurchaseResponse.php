@@ -2,6 +2,7 @@
 
 namespace Omnipay\MobilPay\Message;
 
+use stdClass;
 use Omnipay\Common\Message\AbstractResponse;
 use Omnipay\Common\Message\RequestInterface;
 
@@ -29,7 +30,6 @@ class CompletePurchaseResponse extends AbstractResponse
      * @param Omnipay\Common\Message\RequestInterface $request
      * @param array $data
      * @param stdClass $responseError
-     * @return void
      */
     public function __construct(RequestInterface $request, $data, $responseError)
     {
@@ -50,7 +50,7 @@ class CompletePurchaseResponse extends AbstractResponse
      */
     public function isSuccessful()
     {
-        return in_array($this->action, ['confirmed']);
+        return $this->action == 'confirmed';
     }
 
     /**
