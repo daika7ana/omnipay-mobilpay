@@ -80,19 +80,34 @@ class CompletePurchaseResponse extends AbstractResponse
     }
 
     /**
+     * Build the IPN acknowledgement body.
+     *
+     * @return string
+     */
+    public function getCrcResponse(): string
+    {
+        $xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
+        $message = htmlspecialchars((string) $this->responseError->message, ENT_XML1 | ENT_QUOTES, 'UTF-8');
+
+        if ($this->responseError->code == 0) {
+            $xml .= "<crc>{$message}</crc>";
+        } else {
+            $xml .= "<crc error_type=\"{$this->responseError->type}\" error_code=\"{$this->responseError->code}\">{$message}</crc>";
+        }
+
+        return $xml;
+    }
+
+    /**
      * Send IPN response.
+     *
+     * @deprecated Use getCrcResponse() and return it as an HTTP response; header()/echo bypasses the framework response lifecycle.
      *
      * @return void
      */
     public function sendResponse(): void
     {
         header('Content-type: application/xml');
-        echo "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
-
-        if ($this->responseError->code == 0) {
-            echo "<crc>{$this->responseError->message}</crc>";
-        } else {
-            echo "<crc error_type=\"{$this->responseError->type}\" error_code=\"{$this->responseError->code}\">{$this->responseError->message}</crc>";
-        }
+        echo $this->getCrcResponse();
     }
 }

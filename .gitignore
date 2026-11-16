@@ -3,3 +3,8 @@ composer.phar
 composer.lock
 .DS_Store
 pint.json
+.phpunit.cache/
+.phpunit.result.cache
+.idea/
+.vscode/
+.env

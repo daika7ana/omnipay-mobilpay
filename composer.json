@@ -10,7 +10,7 @@
         "payment",
         "purchase"
     ],
-    "homepage": "https://github.com/BusienssMastery/omnipay-mobilpay",
+    "homepage": "https://github.com/daika7ana/omnipay-mobilpay",
     "license": "MIT",
     "authors": [
         {
@@ -19,18 +19,25 @@
         }
     ],
     "require": {
-        "php": ">=7.4",
-        "omnipay/common": "~3.0"
+        "php": "^8.2",
+        "omnipay/common": "^3.5"
     },
     "require-dev": {
-        "omnipay/tests": "^4.1"
+        "phpunit/phpunit": "^11.5|^12.0|^13.0"
     },
     "autoload": {
         "psr-4": {
             "Omnipay\\MobilPay\\": "src/BusinessMastery/Mobilpay"
         }
     },
-    "minimum-stability": "dev",
+    "autoload-dev": {
+        "psr-4": {
+            "Omnipay\\MobilPay\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit"
+    },
     "config": {
         "allow-plugins": {
             "php-http/discovery": false

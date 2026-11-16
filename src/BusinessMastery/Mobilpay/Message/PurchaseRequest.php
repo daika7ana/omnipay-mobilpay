@@ -257,7 +257,7 @@ class PurchaseRequest extends AbstractRequest
             'env_key' => $card->getEnvKey(),
             'data' => $card->getEncData(),
             'cipher' => $card->getCipher(),
-            'iv' => $card->getIv()
+            'iv' => $card->getIv(),
         ];
     }
 

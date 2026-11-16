@@ -62,9 +62,9 @@ abstract class AbstractRequest
 
     public const ERROR_CONFIRM_INVALID_ACTION = 0x300000F6;
 
-    const ERROR_CONFIRM_FAILED_DECODING_IV = 0x300000F7;
+    public const ERROR_CONFIRM_FAILED_DECODING_IV = 0x300000F7;
 
-	const ERROR_REQUIRED_CIPHER_NOT_AVAILABLE = 0x300000F8;
+    public const ERROR_REQUIRED_CIPHER_NOT_AVAILABLE = 0x300000F8;
 
     public const VERSION_QUERY_STRING = 0x01;
 
@@ -196,7 +196,7 @@ abstract class AbstractRequest
     {
         $objPmReq = null;
         $domDocument = new DOMDocument();
-        if (@$domDocument->loadXML($data) === true) {
+        if (@$domDocument->loadXML($data, LIBXML_NONET) === true) {
             // try to create payment request from xml
             $objPmReq = self::_factoryFromXml($domDocument);
             $objPmReq->_setRequestInfo(self::VERSION_XML, $data);
@@ -209,57 +209,47 @@ abstract class AbstractRequest
         return $objPmReq;
     }
 
-    static public function factoryFromEncrypted($envKey, $encData, $privateKeyFilePath, $privateKeyPassword = null, $cipher_algo = 'aes-256-cbc', $iv = null)
+    public static function factoryFromEncrypted($envKey, $encData, $privateKeyFilePath, $privateKeyPassword = null, $cipher_algo = 'aes-256-cbc', $iv = null)
     {
-		$privateKey = null;
-		if($privateKeyPassword == null)
-		{
-			$privateKey = @openssl_get_privatekey($privateKeyFilePath);
-			if ($privateKey === false)
-				{
-					$privateKey = @openssl_get_privatekey("file://{$privateKeyFilePath}");
-				}
-		}
-		else
-		{
-			$privateKey = @openssl_get_privatekey($privateKeyFilePath, $privateKeyPassword);
-			if ($privateKey === false)
-				{
-				$privateKey = @openssl_get_privatekey("file://{$privateKeyFilePath}", $privateKeyPassword);
-				}
-		}
-
-		if($privateKey === false)
-        {
-        	throw new \Exception('Error loading private key', self::ERROR_CONFIRM_LOAD_PRIVATE_KEY);
+        $privateKey = null;
+        if ($privateKeyPassword == null) {
+            $privateKey = @openssl_get_privatekey($privateKeyFilePath);
+            if ($privateKey === false) {
+                $privateKey = @openssl_get_privatekey("file://{$privateKeyFilePath}");
+            }
+        } else {
+            $privateKey = @openssl_get_privatekey($privateKeyFilePath, $privateKeyPassword);
+            if ($privateKey === false) {
+                $privateKey = @openssl_get_privatekey("file://{$privateKeyFilePath}", $privateKeyPassword);
+            }
         }
 
-        $srcData = base64_decode($encData);
-		if($srcData === false)
-		{
-			@openssl_free_key($privateKey);
-			throw new \Exception('Failed decoding data', self::ERROR_CONFIRM_FAILED_DECODING_DATA);
-		}
+        if ($privateKey === false) {
+            throw new \Exception('Error loading private key', self::ERROR_CONFIRM_LOAD_PRIVATE_KEY);
+        }
 
-		$srcEnvKey = base64_decode($envKey);
-		if($srcEnvKey === false)
-		{
-			throw new \Exception('Failed decoding envelope key', self::ERROR_CONFIRM_FAILED_DECODING_ENVELOPE_KEY);
-		}
+        $srcData = base64_decode($encData, true);
+        if ($srcData === false) {
+            throw new \Exception('Failed decoding data', self::ERROR_CONFIRM_FAILED_DECODING_DATA);
+        }
 
-		$srcIv = base64_decode($iv ?? '');
-		if($srcIv === false)
-		{
-			throw new \Exception('Failed decoding initialization vector', self::ERROR_CONFIRM_FAILED_DECODING_IV);
-		}
+        $srcEnvKey = base64_decode($envKey, true);
+        if ($srcEnvKey === false) {
+            throw new \Exception('Failed decoding envelope key', self::ERROR_CONFIRM_FAILED_DECODING_ENVELOPE_KEY);
+        }
 
-		$data = null;
+        // Lenient: RC4 ignores the IV, and a wrong AES IV is caught by openssl_open below.
+        $srcIv = base64_decode($iv ?? '', false);
+        if ($srcIv === false) {
+            $srcIv = '';
+        }
+
+        $data = null;
         $result = @openssl_open($srcData, $data, $srcEnvKey, $privateKey, $cipher_algo, $srcIv);
 
-		if($result === false)
-		{
-			throw new \Exception('Failed decrypting data', self::ERROR_CONFIRM_FAILED_DECRYPT_DATA);
-		}
+        if ($result === false) {
+            throw new \Exception('Failed decrypting data', self::ERROR_CONFIRM_FAILED_DECRYPT_DATA);
+        }
 
         return self::factory($data);
     }
@@ -297,7 +287,7 @@ abstract class AbstractRequest
             throw new Exception(
                 'Required cipher algorithm aes-256-cbc is not available on this system. '
                 . 'Available algorithms: ' . implode(', ', $existing_algos),
-                self::ERROR_REQUIRED_CIPHER_NOT_AVAILABLE
+                self::ERROR_REQUIRED_CIPHER_NOT_AVAILABLE,
             );
         }
 
@@ -368,7 +358,7 @@ abstract class AbstractRequest
 
         $attr = $orderElem->attributes->getNamedItem('type');
         if ($attr == null || (string) $attr->nodeValue === '') {
-            throw new Exception('factoryFromXml invalid payment request type=' . $attr->nodeValue, self::ERROR_FACTORY_BY_XML_ORDER_TYPE_ATTR_NOT_FOUND);
+            throw new Exception('factoryFromXml invalid payment request type=' . ($attr?->nodeValue ?? ''), self::ERROR_FACTORY_BY_XML_ORDER_TYPE_ATTR_NOT_FOUND);
         }
 
         switch ($attr->nodeValue) {

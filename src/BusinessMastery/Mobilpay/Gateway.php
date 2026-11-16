@@ -28,7 +28,7 @@ class Gateway extends AbstractGateway
             'merchantId' => null,
             'publicKey' => null,
             'testMode' => false,
-            'recurrence' => false
+            'recurrence' => false,
         ];
     }
 
@@ -159,7 +159,7 @@ class Gateway extends AbstractGateway
      */
     public function setBillingAddress(array $parameters = [])
     {
-        $this->setParameter('billingAddress', $parameters);
+        return $this->setParameter('billingAddress', $parameters);
     }
 
     /**

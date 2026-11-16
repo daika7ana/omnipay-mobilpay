@@ -20,7 +20,7 @@ class Recurrence
 
     public $payments_no;
 
-    public function __construct(DOMNode $domNode = null)
+    public function __construct(?DOMNode $domNode = null)
     {
         if ($domNode != null) {
             $this->loadFromXml($domNode);

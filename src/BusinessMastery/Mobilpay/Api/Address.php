@@ -173,7 +173,7 @@ class Address
             'ppiBank' => $this->bank,
             'ppiIban' => $this->iban,
             'ppiFiscalNumber' => $this->fiscalNumber,
-            'ppiIdentityNumber' => $this->identityNumber
+            'ppiIdentityNumber' => $this->identityNumber,
         ];
     }
 
